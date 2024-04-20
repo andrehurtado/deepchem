@@ -415,7 +415,7 @@ PagtnModel
   :members:
 
 AtomConvModel
-----------
+-------------
 
 .. autoclass:: deepchem.models.torch_models.AtomConvModel
   :members:
@@ -547,6 +547,18 @@ Density Functional Theory Model - XCModel
 -----------------------------------------
 
 .. autoclass:: deepchem.models.dft.dftxc.XCModel
+  :members:
+
+TextCNNModel
+------------
+
+.. autoclass:: deepchem.models.torch_models.TextCNNModel
+  :members:
+
+UNetModel
+------------
+
+.. autoclass:: deepchem.models.torch_models.UNetModel
   :members:
 
 PyTorch Lightning Models

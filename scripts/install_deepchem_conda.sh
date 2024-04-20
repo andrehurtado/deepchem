@@ -7,7 +7,7 @@ CMDNAME=`basename ${BASH_SOURCE:-$0}`
 if [ $# -ne 2 ]; then
     echo "Please set two arguments."
     echo "Usage) source $CMDNAME python_version cpu_or_gpu" 1>&2
-    echo "Example) source $CMDNAME 3.6 gpu" 1>&2
+    echo "Example) source $CMDNAME 3.10 gpu" 1>&2
     return 1
 fi
 
@@ -18,6 +18,7 @@ eval "$(conda shell.bash hook)"
 # Create deepchem environment
 conda config --set always_yes yes
 conda create --name deepchem python=$1
+conda activate deepchem
 conda install -c conda-forge conda-merge
 
 dir="$PWD/requirements"
