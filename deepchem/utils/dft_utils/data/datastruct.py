@@ -1,7 +1,7 @@
 """
 Density Functional Theory Data Structure Utilities
 """
-from typing import Union, TypeVar, Generic, Optional, Callable, List, Dict
+from typing import Any, Union, TypeVar, Generic, Optional, Callable, List, Dict
 from dataclasses import dataclass
 import torch
 import numpy as np
@@ -58,15 +58,30 @@ class SpinParam(Generic[T]):
         """Return the string representation of the SpinParam object."""
         return f"SpinParam(u={self.u}, d={self.d})"
 
-    def sum(self):
+    def sum(a: Union['SpinParam[T]', T]) -> Any:
         """Returns the sum of up and down parameters."""
+        if isinstance(a, SpinParam):
+            return a.u + a.d  # type: ignore
+        else:
+            return a
 
-        return self.u + self.d
-
-    def reduce(self, fcn: Callable) -> T:
+    def reduce(a: Union['SpinParam[T]', T], fcn: Callable[[T, T], T]) -> T:
         """Reduce up and down parameters with the given function."""
+        if isinstance(a, SpinParam):
+            return fcn(a.u, a.d)
+        else:
+            return a
 
-        return fcn(self.u, self.d)
+    @staticmethod
+    def apply_fcn(fcn: Callable[..., P], *a):
+        """"Apply the function for each up and down elements of a"""
+        assert len(a) > 0
+        if isinstance(a[0], SpinParam):
+            u_vals = [aa.u for aa in a]
+            d_vals = [aa.d for aa in a]
+            return SpinParam(u=fcn(*u_vals), d=fcn(*d_vals))
+        else:
+            return fcn(*a)
 
 
 @dataclass
@@ -161,7 +176,11 @@ class CGTOBasis:
 
     """
 
-    def __init__(self, angmom: int, alphas: torch.Tensor, coeffs: torch.Tensor):
+    def __init__(self,
+                 angmom: int,
+                 alphas: torch.Tensor,
+                 coeffs: torch.Tensor,
+                 normalized: bool = False):
         """Initialize the CGTOBasis object.
 
         Parameters
@@ -177,7 +196,7 @@ class CGTOBasis:
         self.angmom = angmom
         self.alphas = alphas
         self.coeffs = coeffs
-        self.normalized = False
+        self.normalized = normalized
 
     def __repr__(self):
         """Return the string representation of the CGTOBasis object.
@@ -263,7 +282,10 @@ class AtomCGTOBasis:
         """
         self.atomz = atomz
         self.bases = bases
-        self.pos = torch.tensor(pos)
+        if isinstance(pos, torch.Tensor):
+            self.pos = pos
+        else:
+            self.pos = torch.tensor(pos)
 
     def __repr__(self):
         """Return the string representation of the AtomCGTOBasis object.
